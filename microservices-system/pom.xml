@@ -17,7 +17,7 @@
 
   <properties>
     <java.version>21</java.version>
-    <spring.boot.version>3.5.0</spring.boot.version>
+    <spring.boot.version>3.5.6</spring.boot.version>
     <spring.cloud.version>2025.0.0</spring.cloud.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
@@ -40,6 +40,12 @@
         <version>${spring.cloud.version}</version>
         <type>pom</type>
         <scope>import</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-lang3</artifactId>
+        <version>3.18.0</version>
       </dependency>
 
     </dependencies>
