@@ -11,28 +11,28 @@ import java.util.List;
 
 @FeignClient(
         name = "data-service",
-        url = "${data.service.url}"
+        url = "${data.service.url}",
+        configuration = com.mycompany.app.business_service.client.config.FeignClientConfig.class
 )
-
 public interface DataServiceClient {
 
     @GetMapping("/data/productos")
     List<ProductoDTO> obtenerTodosLosProductos();
 
     @GetMapping("/data/productos/{id}")
-    ProductoDTO obtenerProductoPorId(@PathVariable Long id);
+    ProductoDTO obtenerProductoPorId(@PathVariable("id") Long id);
 
     @PostMapping("/data/productos")
     ProductoDTO crearProducto(@RequestBody ProductoRequest request);
 
     @PutMapping("/data/productos/{id}")
-    ProductoDTO actualizarProducto(@PathVariable Long id, @RequestBody ProductoRequest request);
+    ProductoDTO actualizarProducto(@PathVariable("id") Long id, @RequestBody ProductoRequest request);
 
     @DeleteMapping("/data/productos/{id}")
-    void eliminarProducto(@PathVariable Long id);
+    void eliminarProducto(@PathVariable("id") Long id);
 
     @GetMapping("/data/productos/categoria/{nombre}")
-    List<ProductoDTO> obtenerProductosPorCategoria(@PathVariable String nombre);
+    List<ProductoDTO> obtenerProductosPorCategoria(@PathVariable("nombre") String nombre);
 
     @GetMapping("/data/categorias")
     List<CategoriaDTO> obtenerTodasLasCategorias();
