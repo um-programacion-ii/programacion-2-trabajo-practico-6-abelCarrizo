@@ -1,7 +1,13 @@
 package com.mycompany.app.business_service.client;
 
+import com.mycompany.app.business_service.dto.CategoriaDTO;
+import com.mycompany.app.business_service.dto.InventarioDTO;
+import com.mycompany.app.business_service.dto.ProductoDTO;
+import com.mycompany.app.business_service.dto.ProductoRequest;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @FeignClient(
         name = "data-service",
