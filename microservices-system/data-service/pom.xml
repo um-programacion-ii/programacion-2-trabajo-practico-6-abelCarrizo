@@ -55,6 +55,13 @@
       <artifactId>mockito-core</artifactId>
       <scope>test</scope>
     </dependency>
+
+    <!-- Validaciones -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-validation</artifactId>
+    </dependency>
+
   </dependencies>
 
   <build>
