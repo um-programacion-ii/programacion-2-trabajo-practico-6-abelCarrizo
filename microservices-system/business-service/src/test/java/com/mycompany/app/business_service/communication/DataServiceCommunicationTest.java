@@ -1,4 +1,3 @@
-// business-service/src/test/java/com/mycompany/app/business_service/communication/DataServiceCommunicationTest.java
 package com.mycompany.app.business_service.communication;
 
 import com.mycompany.app.business_service.BusinessServiceApplication;
