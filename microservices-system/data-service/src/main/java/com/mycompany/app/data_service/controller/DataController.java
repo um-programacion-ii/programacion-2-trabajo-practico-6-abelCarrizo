@@ -38,7 +38,7 @@ public class DataController {
     }
 
     @GetMapping("/productos/{id}")
-    public Producto obtenerProductoPorId(@PathVariable @Min(1) Long id) {
+    public Producto obtenerProductoPorId(@PathVariable("id") @Min(1) Long id) {
         return productoService.buscarPorId(id);
     }
 
@@ -49,19 +49,19 @@ public class DataController {
     }
 
     @PutMapping("/productos/{id}")
-    public Producto actualizarProducto(@PathVariable @Min(1) Long id,
+    public Producto actualizarProducto(@PathVariable("id") @Min(1) Long id,
                                        @Valid @RequestBody Producto producto) {
         return productoService.actualizar(id, producto);
     }
 
     @DeleteMapping("/productos/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void eliminarProducto(@PathVariable @Min(1) Long id) {
+    public void eliminarProducto(@PathVariable("id") @Min(1) Long id) {
         productoService.eliminar(id);
     }
 
     @GetMapping("/productos/categoria/{nombre}")
-    public List<Producto> obtenerProductosPorCategoria(@PathVariable @NotBlank String nombre) {
+    public List<Producto> obtenerProductosPorCategoria(@PathVariable("nombre") @NotBlank String nombre) {
         return productoService.buscarPorCategoria(nombre);
     }
 
