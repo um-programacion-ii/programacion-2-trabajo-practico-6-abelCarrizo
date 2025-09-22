@@ -10,6 +10,8 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -48,7 +50,7 @@ public class DataController {
         return productoService.guardar(producto);
     }
 
-    @PutMapping("/productos/{id}")
+    @PutMapping(value = "/productos/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Producto actualizarProducto(@PathVariable("id") @Min(1) Long id,
                                        @Valid @RequestBody Producto producto) {
         return productoService.actualizar(id, producto);
@@ -68,6 +70,16 @@ public class DataController {
     @GetMapping("/categorias")
     public List<Categoria> obtenerTodasLasCategorias() {
         return categoriaService.obtenerTodas();
+    }
+
+    @PostMapping(
+            value = "/categorias",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<Categoria> crearCategoria(@RequestBody Categoria categoria) {
+        Categoria creada = categoriaService.guardar(categoria); // usa tu service/repo
+        return ResponseEntity.status(HttpStatus.CREATED).body(creada);
     }
 
     @GetMapping("/inventario/stock-bajo")

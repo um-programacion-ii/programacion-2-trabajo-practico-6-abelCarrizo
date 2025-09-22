@@ -1,5 +1,8 @@
 package com.mycompany.app.data_service.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
@@ -10,6 +13,7 @@ import java.math.BigDecimal;
 @ToString(exclude = {"categoria", "inventario"})
 @Entity
 @Table(name = "productos")
+@JsonIgnoreProperties({"categoria", "inventario"})
 public class Producto {
 
     @Id
@@ -28,10 +32,12 @@ public class Producto {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "categoria_id", nullable = false)
+    @JsonIgnoreProperties({"productos"})
     private Categoria categoria;
 
     @OneToOne(mappedBy = "producto", fetch = FetchType.LAZY,
             cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference(value = "producto-inventario")
     private Inventario inventario;
 
     // Helpers para mantener la relación en ambos lados
@@ -47,5 +53,52 @@ public class Producto {
         if (categoria != null && !categoria.getProductos().contains(this)) {
             categoria.getProductos().add(this);
         }
+    }
+
+    @JsonProperty("categoriaId")
+    public void setCategoriaIdFromJson(Long categoriaId) {
+        if (categoriaId != null) {
+            Categoria c = new Categoria();
+            c.setId(categoriaId);
+            this.setCategoria(c); // usa tu helper para mantener ambos lados
+        }
+    }
+
+    @JsonProperty("stock")
+    public void setStockFromJson(Integer cantidad) {
+        if (cantidad == null) return;
+        if (this.getInventario() == null) {
+            Inventario inv = new Inventario();
+            inv.setStockMinimo(0);          // valor por defecto para NOT NULL
+            this.setInventario(inv);        // usa tu helper
+        }
+        this.getInventario().setCantidad(cantidad);
+    }
+
+    @JsonProperty("stockMinimo")
+    public void setStockMinimoFromJson(Integer min) {
+        if (min == null) return;
+        if (this.getInventario() == null) {
+            Inventario inv = new Inventario();
+            this.setInventario(inv);
+        }
+        this.getInventario().setStockMinimo(min);
+    }
+
+    @JsonProperty("categoriaNombre")
+    public String getCategoriaNombreJson() {
+        return (categoria != null) ? categoria.getNombre() : null;
+    }
+
+    @JsonProperty("stock")
+    public Integer getStockJson() {
+        return (inventario != null) ? inventario.getCantidad() : null;
+    }
+
+    @JsonProperty("stockBajo")
+    public Boolean getStockBajoJson() {
+        Integer s = (inventario != null) ? inventario.getCantidad() : null;
+        Integer m = (inventario != null) ? inventario.getStockMinimo() : null;
+        return (s != null && m != null) ? s < m : null;
     }
 }

@@ -1,5 +1,6 @@
 package com.mycompany.app.business_service.client;
 
+import com.mycompany.app.business_service.client.config.FeignClientConfig;
 import com.mycompany.app.business_service.dto.CategoriaDTO;
 import com.mycompany.app.business_service.dto.InventarioDTO;
 import com.mycompany.app.business_service.dto.ProductoDTO;
@@ -12,7 +13,7 @@ import java.util.List;
 @FeignClient(
         name = "data-service",
         url = "${data.service.url}",
-        configuration = com.mycompany.app.business_service.client.config.FeignClientConfig.class
+        configuration = FeignClientConfig.class
 )
 public interface DataServiceClient {
 
@@ -25,7 +26,7 @@ public interface DataServiceClient {
     @PostMapping("/data/productos")
     ProductoDTO crearProducto(@RequestBody ProductoRequest request);
 
-    @PutMapping("/data/productos/{id}")
+    @PutMapping(value = "/data/productos/{id}", consumes = "application/json", produces = "application/json")
     ProductoDTO actualizarProducto(@PathVariable("id") Long id, @RequestBody ProductoRequest request);
 
     @DeleteMapping("/data/productos/{id}")

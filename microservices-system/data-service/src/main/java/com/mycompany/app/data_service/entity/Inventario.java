@@ -1,5 +1,6 @@
 package com.mycompany.app.data_service.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -19,6 +20,7 @@ public class Inventario {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "producto_id", nullable = false, unique = true)
+    @JsonBackReference(value = "producto-inventario")
     private Producto producto;
 
     @Column(nullable = false)

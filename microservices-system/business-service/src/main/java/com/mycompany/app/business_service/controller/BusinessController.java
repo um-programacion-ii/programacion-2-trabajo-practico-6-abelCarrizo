@@ -49,7 +49,7 @@ public class BusinessController {
         return productoBusinessService.crearProducto(request);
     }
 
-    @PutMapping("/productos/{id}")
+    @PutMapping(value = "/productos/{id}", consumes = "application/json", produces = "application/json")
     public ProductoDTO actualizarProducto(@PathVariable("id") @Min(1) Long id,
                                           @Valid @RequestBody ProductoRequest request) {
         return productoBusinessService.actualizarProducto(id, request);

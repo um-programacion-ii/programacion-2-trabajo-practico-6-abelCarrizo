@@ -57,17 +57,21 @@ public class ProductoServiceImpl implements ProductoService {
     }
 
     @Override
+    @Transactional
     public Producto actualizar(Long id, Producto cambios) {
+        // Para parcial: validar que haya al menos 1 campo a actualizar,
+        // NO exigir todos los obligatorios como en crear()
         validarProductoParaActualizar(cambios);
 
         Producto existente = buscarPorId(id);
 
-        // Campos simples
-        if (cambios.getNombre() != null) existente.setNombre(cambios.getNombre());
+        // ----- Campos simples (parcial) -----
+        if (cambios.getNombre() != null)      existente.setNombre(cambios.getNombre());
         if (cambios.getDescripcion() != null) existente.setDescripcion(cambios.getDescripcion());
-        if (cambios.getPrecio() != null) existente.setPrecio(cambios.getPrecio());
+        if (cambios.getPrecio() != null)      existente.setPrecio(cambios.getPrecio());
 
-        // Cambiar categoría si vino
+        // ----- Categoría (parcial) -----
+        // llega seteada por setCategoriaIdFromJson(categoriaId)
         if (cambios.getCategoria() != null && cambios.getCategoria().getId() != null) {
             Long nuevaCatId = cambios.getCategoria().getId();
             Categoria nueva = categoriaRepository.findById(nuevaCatId)
@@ -75,14 +79,23 @@ public class ProductoServiceImpl implements ProductoService {
             existente.setCategoria(nueva);
         }
 
+        // ----- Inventario (fusionar, NO reemplazar) -----
         if (cambios.getInventario() != null) {
-            Inventario inv = cambios.getInventario();
-            inv.setProducto(existente);
-            existente.setInventario(inv);
+            Inventario in = cambios.getInventario();
+            Inventario dst = existente.getInventario();
+            if (dst == null) {
+                dst = new Inventario();
+                dst.setProducto(existente);
+                existente.setInventario(dst);
+            }
+            if (in.getCantidad() != null)     dst.setCantidad(in.getCantidad());
+            if (in.getStockMinimo() != null)  dst.setStockMinimo(in.getStockMinimo());
+            // fechaActualizacion se ajusta con @PreUpdate/@PrePersist si ya lo tenés
         }
 
         return productoRepository.save(existente);
     }
+
 
     @Override
     public void eliminar(Long id) {
@@ -113,11 +126,16 @@ public class ProductoServiceImpl implements ProductoService {
         }
     }
 
-    // --- Validaciones simples ---
-    private void validarProductoParaActualizar(Producto p) {
-        if (p == null) throw new ValidacionDatosException("Producto requerido.");
-        if (p.getPrecio() != null && p.getPrecio().compareTo(BigDecimal.ZERO) < 0) {
-            throw new ValidacionDatosException("El precio no puede ser negativo.");
-        }
+    private void validarProductoParaActualizar(Producto cambios) {
+        boolean hayAlgo =
+                cambios.getNombre() != null ||
+                        cambios.getDescripcion() != null ||
+                        cambios.getPrecio() != null ||
+                        (cambios.getCategoria() != null && cambios.getCategoria().getId() != null) ||
+                        (cambios.getInventario() != null && (
+                                cambios.getInventario().getCantidad() != null ||
+                                        cambios.getInventario().getStockMinimo() != null
+                        ));
+        if (!hayAlgo) throw new ValidacionDatosException("No hay campos para actualizar");
     }
 }
