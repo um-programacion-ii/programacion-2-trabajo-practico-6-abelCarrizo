@@ -10,6 +10,11 @@
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue)
 ![H2](https://img.shields.io/badge/H2-2.2-green)
 
+<details>
+<summary>
+    📋<strong>Mostrar consigna completa</strong>
+</summary>
+
 ## ⚠️ Importante: Antes de Comenzar
 
 1. **Lectura Completa**
@@ -92,10 +97,6 @@ git push -u origin develop
 
 > 💡 **Nota**: Aunque este trabajo se realiza individualmente, se utilizan Pull Requests para mantener un historial de cambios ordenado y seguir buenas prácticas de desarrollo. Los Pull Requests serán auto-aprobados por el mismo estudiante.
 
-## 🎯 Objetivo General
-
-Desarrollar un sistema de microservicios utilizando Spring Boot y Feign, implementando dos microservicios independientes: uno para manejar la base de datos y otro para las reglas de negocio. El sistema deberá utilizar diferentes profiles para trabajar con múltiples bases de datos (H2 en desarrollo, MySQL y PostgreSQL en producción), aplicando las mejores prácticas de arquitectura de microservicios y comunicación entre servicios.
-
 ## ⏰ Tiempo Estimado y Entrega
 
 - **Tiempo estimado de realización:** 35-40 horas
@@ -107,10 +108,6 @@ Desarrollar un sistema de microservicios utilizando Spring Boot y Feign, impleme
 - Docker, Testing y documentación: 5-8 horas
 
 > 💡 **Nota**: Esta estimación considera la complejidad de configurar microservicios, comunicación entre servicios con Feign, múltiples bases de datos y Docker. El tiempo incluye el aprendizaje de conceptos de microservicios y Spring Cloud.
-
-## 👨‍🎓 Información del Alumno
-- **Nombre y Apellido**: [Nombre y Apellido del Alumno]
-- **Legajo**: [Número de Legajo]
 
 > ⚠️ **IMPORTANTE**: Este trabajo práctico se realiza **INDIVIDUALMENTE**. Aunque se utilizan herramientas de colaboración como Pull Requests y Code Review, estas son para mantener buenas prácticas de desarrollo y un historial ordenado. Todo el desarrollo debe ser realizado por el mismo estudiante.
 
@@ -1186,7 +1183,143 @@ Cada archivo debe seguir este formato:
 ## Prompt 2: [Descripción breve]
 [Repetir estructura para cada prompt]
 ```
+</details>
+
+## 📑 Índice
+- [🎯 Objetivo General](#-objetivo-general)
+- [👨‍🎓 Información del Alumno](#-información-del-alumno)
+
+## 🎯 Objetivo General
+
+Desarrollar un sistema de microservicios utilizando Spring Boot y Feign, implementando dos microservicios independientes: uno para manejar la base de datos y otro para las reglas de negocio. El sistema deberá utilizar diferentes profiles para trabajar con múltiples bases de datos (H2 en desarrollo, MySQL y PostgreSQL en producción), aplicando las mejores prácticas de arquitectura de microservicios y comunicación entre servicios.
+
+## 👨‍🎓 Información del Alumno
+- **Nombre y Apellido**: Abel Carrizo
+- **Legajo**: 59164
+
+---
+
+> **Consejo** Abrí **la raíz `microservices-system`**, luego ejecutá con los comandos Maven de arriba.
+
+--- 
+
+## Puesta en marcha
+
+1. **Clonar** y ubicarse en la raíz:
+   ```bash
+   git clone https://github.com/um-programacion-ii/programacion-2-trabajo-practico-6-abelCarrizo.git
+   cd <proyecto>/microservices-system
+   ```
+2. **(Opcional) Levantar DBs** si vas a usar `mysql` o `postgres`:
+   ```bash
+   docker compose up -d
+   ```
+3. **Iniciar servicios (en terminales separadas):**
+   ```bash
+   # Terminal A
+   mvn -q -pl data-service spring-boot:run -Dspring-boot.run.profiles=dev
+   # Terminal B
+   mvn -q -pl business-service spring-boot:run -Dspring-boot.run.profiles=dev
+   ```
+   **(Opcional)** Ejecutar con un perfil si levantaste DBs:
+
+    ```bash 
+    # data-service (MySQL)
+    mvn -q -pl data-service spring-boot:run -Dspring-boot.run.profiles=mysql
+    
+    # business-service (dev)
+    mvn -q -pl business-service spring-boot:run -Dspring-boot.run.profiles=dev
+    ```
+4. **Probar:** ver endpoints en `http://localhost:8081` (data) y `http://localhost:8082` (business).
+
+---
+
+## Endpoints
+
+> Los paths exactos pueden variar levemente según el controlador.
+
+### data-service (8081)
+
+- `GET /data/productos` — listar
+- `GET /data/productos/{id}` — detalle
+- `POST /data/productos` — crear
+- `PUT /data/productos/{id}` — actualizar
+- `DELETE /data/productos/{id}` — eliminar
+- `GET /data/productos/categoria/{nombre}` — por categoría
+- `GET /data/inventario/stock-bajo?min={n}` — productos con stock < `n`
+- `GET /data/categorias` / `POST /data/categorias` / etc. — categorías
+
+### business-service (8082)
+
+- `GET /api/productos` — listado con reglas de negocio (filtros por precio, etc.)
+- `GET /api/productos/{id}` - detalle vía Feign
+- `GET /api/productos/categoria/{nombre}` — por categoría (via Feign)
+- `GET /api/reportes/stock-bajo` — reporte de stock bajo
+
+## Ejemplos `curl`
+
+> **Requisitos previos**: ambos servicios arriba en `dev`. Creá una categoría via **H2 Console** (`http://localhost:8081/h2-console`, URL `jdbc:h2:mem:microservices_db`, user `sa`, pass vacío):
+> ```sql
+> INSERT INTO CATEGORIAS (NOMBRE, DESCRIPCION) VALUES ('Periféricos','Cat.');
+> SELECT * FROM CATEGORIAS;
+> ```
+> 
+> o utilizando curl:
+> ```bash
+> curl -i -X POST http://localhost:8081/data/categorias   -H "Content-Type: application/json"   -d '{ "nombre": "Periféricos", "descripcion": "Cat." }'
+> ```
+
+### Crear producto (vía negocio)
+```bash
+curl -i -X POST http://localhost:8082/api/productos   -H "Content-Type: application/json"   -d '{
+    "nombre": "Teclado mecánico",
+    "descripcion": "Switches brown",
+    "precio": 99.9,
+    "categoriaId": 1,
+    "stock": 7,
+    "stockMinimo": 2
+  }'
+```
+
+### Listar
+```bash
+curl -s http://localhost:8082/api/productos | jq
+curl -s http://localhost:8081/data/productos | jq
+```
+
+### Actualizar (parcial) — precio
+```bash
+curl -i -X PUT http://localhost:8082/api/productos/1   -H "Content-Type: application/json"   -d '{ "precio": 120.0 }'
+```
+
+### Actualizar (parcial) — stock y mínimo
+```bash
+curl -i -X PUT http://localhost:8082/api/productos/1   -H "Content-Type: application/json"   -d '{ "stock": 12, "stockMinimo": 3 }'
+```
+
+### Cambiar categoría
+```bash
+curl -i -X PUT http://localhost:8082/api/productos/1   -H "Content-Type: application/json"   -d '{ "categoriaId": 2 }'
+```
+
+### Eliminar
+```bash
+curl -i -X DELETE http://localhost:8082/api/productos/1
+```
+
+---
+
+## Tests
+
+```bash
+# Ejecutar todos los tests desde la raiz
+mvn clean verify
+
+```
+
+---
 
 ## 📝 Licencia
 
 Este trabajo es parte del curso de Programación II de Ingeniería en Informática. Uso educativo únicamente.
+

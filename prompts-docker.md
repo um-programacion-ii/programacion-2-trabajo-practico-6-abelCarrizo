@@ -1,0 +1,1 @@
+No se realizaron prompts ya que lo aprendido sobre docker lo vi en el TP5.
